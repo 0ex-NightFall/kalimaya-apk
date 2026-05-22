@@ -1,61 +1,62 @@
-name: Build Android APK
-
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/build-android-apk.yml'
-
-jobs:
-  build-apk:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.5'
-          channel: stable
-
-      - name: Flutter doctor
-        run: flutter doctor -v
-
-      - name: Inject API base URL
-        working-directory: mobile
-        run: |
-          mkdir -p lib
-          echo "const String kApiBaseUrl = 'http://192.168.1.1:5000';" > lib/config.dart
-          cat lib/config.dart
-
-      - name: Flutter pub get
-        working-directory: mobile
-        run: flutter pub get
-
-      - name: Flutter analyze (non-blocking)
-        working-directory: mobile
-        run: flutter analyze || true
-
-      - name: Build APK (debug — no signing needed)
-        working-directory: mobile
-        run: flutter build apk --debug
-
-      - name: List output
-        working-directory: mobile
-        run: ls -la build/app/outputs/flutter-apk/
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kalimaya-apk
-          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: error
+     1|name: Build Android APK
+     2|
+     3|on:
+     4|  workflow_dispatch:
+     5|  push:
+     6|    paths:
+     7|      - 'mobile/**'
+     8|      - '.github/workflows/build-android-apk.yml'
+     9|
+    10|jobs:
+    11|  build-apk:
+    12|    runs-on: ubuntu-latest
+    13|
+    14|    steps:
+    15|      - name: Checkout
+    16|        uses: actions/checkout@v4
+    17|
+    18|      - name: Setup Java
+    19|        uses: actions/setup-java@v4
+    20|        with:
+    21|          distribution: temurin
+    22|          java-version: '17'
+    23|
+    24|      - name: Setup Flutter
+    25|        uses: subosito/flutter-action@v2
+    26|        with:
+    27|          flutter-version: '3.24.5'
+    28|          channel: stable
+    29|
+    30|      - name: Flutter doctor
+    31|        run: flutter doctor -v
+    32|
+    33|      - name: Inject API base URL
+    34|        working-directory: mobile
+    35|        run: |
+    36|          mkdir -p lib
+    37|          echo "const String kApiBaseUrl = 'http://konsultan27.synology.me:5000';" > lib/config.dart
+    38|          cat lib/config.dart
+    39|
+    40|      - name: Flutter pub get
+    41|        working-directory: mobile
+    42|        run: flutter pub get
+    43|
+    44|      - name: Flutter analyze (non-blocking)
+    45|        working-directory: mobile
+    46|        run: flutter analyze || true
+    47|
+    48|      - name: Build APK (debug — no signing needed)
+    49|        working-directory: mobile
+    50|        run: flutter build apk --debug
+    51|
+    52|      - name: List output
+    53|        working-directory: mobile
+    54|        run: ls -la build/app/outputs/flutter-apk/
+    55|
+    56|      - name: Upload APK artifact
+    57|        uses: actions/upload-artifact@v4
+    58|        with:
+    59|          name: kalimaya-apk
+    60|          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+    61|          if-no-files-found: error
+    62|

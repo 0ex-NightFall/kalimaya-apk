@@ -1,2 +1,1 @@
-
-const String kApiBaseUrl = 'http://192.168.1.1:5000';
+const String kApiBaseUrl = 'http://konsultan27.synology.me:5000';
