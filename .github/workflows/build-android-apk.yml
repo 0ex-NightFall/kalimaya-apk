@@ -10,9 +10,6 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile
 
     steps:
       - name: Checkout
@@ -30,21 +27,35 @@ jobs:
           flutter-version: '3.24.5'
           channel: stable
 
-      - name: Flutter pub get
-        run: flutter pub get
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Inject API base URL
+        working-directory: mobile
         run: |
+          mkdir -p lib
           echo "const String kApiBaseUrl = 'http://192.168.1.1:5000';" > lib/config.dart
+          cat lib/config.dart
 
-      - name: Analyze
+      - name: Flutter pub get
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Flutter analyze (non-blocking)
+        working-directory: mobile
         run: flutter analyze || true
 
-      - name: Build APK (release)
-        run: flutter build apk --release
+      - name: Build APK (debug — no signing needed)
+        working-directory: mobile
+        run: flutter build apk --debug
+
+      - name: List output
+        working-directory: mobile
+        run: ls -la build/app/outputs/flutter-apk/
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: kalimaya-apk
-          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
