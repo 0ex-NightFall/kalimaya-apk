@@ -10,56 +10,44 @@ class FilesScreen extends StatefulWidget {
 }
 
 class _FilesScreenState extends State<FilesScreen> {
-  List<dynamic> items = [];
-  bool loading = true;
+  List _files = [];
+  bool _loading = true;
 
   @override
   void initState() { super.initState(); _load(); }
 
   Future<void> _load() async {
     final tok = context.read<AuthState>().token!;
-    final d = await ApiService.getFiles(tok);
-    setState(() { items = d; loading = false; });
-  }
-
-  String _fmtSize(dynamic bytes) {
-    final b = (bytes ?? 0) as num;
-    if (b < 1024) return '${b}B';
-    if (b < 1024 * 1024) return '${(b / 1024).toStringAsFixed(1)}KB';
-    return '${(b / 1024 / 1024).toStringAsFixed(1)}MB';
+    try {
+      final data = await Api(tok).get('/files');
+      setState(() { _files = data is List ? data : []; _loading = false; });
+    } catch (_) { setState(() => _loading = false); }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    if (items.isEmpty) return const Center(child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [Text('📂', style: TextStyle(fontSize: 48)), SizedBox(height: 12), Text('Belum ada file')],
-    ));
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: items.length,
-        itemBuilder: (ctx, i) {
-          final f = items[i];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: ListTile(
-              leading: const Icon(Icons.insert_drive_file, color: Colors.indigo),
-              title: Text(f['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: Text('${_fmtSize(f['sizeBytes'])} · ${f['mimeType'] ?? ''}'),
-              trailing: IconButton(
-                icon: const Icon(Icons.download, color: Colors.indigo),
-                onPressed: () {
-                  final tok = context.read<AuthState>().token!;
-                  final url = 'https://wanted-films-listprice-application.trycloudflare.com/api/files/${f['id']}/download';
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Download: ${f['name']}')));
-                },
-              ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('File'), centerTitle: false,
+        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)]),
+      body: _loading ? const Center(child: CircularProgressIndicator()) : RefreshIndicator(
+        onRefresh: _load,
+        child: _files.isEmpty
+          ? const Center(child: Text('Belum ada file', style: TextStyle(color: Colors.grey)))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _files.length,
+              itemBuilder: (ctx, i) {
+                final f = _files[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: const Icon(Icons.insert_drive_file_outlined, color: Color(0xFF6366F1)),
+                    title: Text(f['originalName'] ?? f['filename'] ?? 'File', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(f['uploader']?['fullName'] ?? '—', style: const TextStyle(fontSize: 12)),
+                  ),
+                );
+              },
             ),
-          );
-        },
       ),
     );
   }

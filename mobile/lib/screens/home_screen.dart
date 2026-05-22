@@ -1,7 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../state/auth_state.dart';
 import 'attendance_screen.dart';
 import 'announcements_screen.dart';
 import 'projects_screen.dart';

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
@@ -16,9 +15,9 @@ class ProfileScreen extends StatelessWidget {
         Center(child: Column(children: [
           Container(
             width: 80, height: 80,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFFA855F7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: LinearGradient(colors: [Color(0xFF6366F1), Color(0xFFA855F7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
             ),
             child: Center(child: Text(
               (user?['fullName'] as String? ?? 'A')[0].toUpperCase(),
@@ -28,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(user?['fullName'] ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          Text('@\${user?['username'] ?? ''}', style: const TextStyle(color: Colors.grey)),
+          Text('@${user?["username"] ?? ""}', style: const TextStyle(color: Colors.grey)),
           if (user?['jobTitle'] != null) ...[
             const SizedBox(height: 4),
             Text(user!['jobTitle'], style: const TextStyle(color: Colors.grey)),

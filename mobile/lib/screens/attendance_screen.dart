@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
@@ -37,16 +36,26 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final tok = context.read<AuthState>().token!;
     final api = Api(tok);
     try {
-      await api.post('/attendance/\$path', {});
+      await api.post('/attendance/$path', {});
       setState(() => _msg = path == 'checkin' ? '✅ Check-in berhasil' : '✅ Check-out berhasil');
       _load();
-    } catch (e) { setState(() => _msg = 'Error: \$e'); }
+    } catch (e) { setState(() => _msg = 'Error: $e'); }
   }
 
   String _fmt(String? iso) {
     if (iso == null) return '—';
     final dt = DateTime.parse(iso).toLocal();
-    return '\${dt.hour.toString().padLeft(2,'0')}:\${dt.minute.toString().padLeft(2,'0')}';
+    final h = dt.hour.toString().padLeft(2, "0");
+    final m = dt.minute.toString().padLeft(2, "0");
+    return '$h:$m';
+  }
+
+  String _fmtDate(String? iso) {
+    if (iso == null) return '—';
+    final dt = DateTime.parse(iso);
+    const days = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    return '${days[dt.weekday-1]}, ${dt.day} ${months[dt.month-1]}';
   }
 
   Color _statusColor(String? s) {
@@ -65,7 +74,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.read<AuthState>().user;
     return Scaffold(
       appBar: AppBar(title: const Text('Absensi'), centerTitle: false,
         actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: _load)]),
@@ -112,7 +120,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           const SizedBox(height: 8),
           ..._history.map((h) => Card(margin: const EdgeInsets.only(bottom: 8), child: ListTile(
             title: Text(_fmtDate(h['date']), style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text('Masuk: \${_fmt(h['checkInAt'])} · Pulang: \${_fmt(h['checkOutAt'])}'),
+            subtitle: Text('Masuk: ${_fmt(h["checkInAt"])} · Pulang: ${_fmt(h["checkOutAt"])}'),
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(color: _statusColor(h['status']).withOpacity(.15), borderRadius: BorderRadius.circular(20)),
@@ -134,12 +142,4 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
     ]),
   ));
-
-  String _fmtDate(String? iso) {
-    if (iso == null) return '—';
-    final dt = DateTime.parse(iso);
-    const days = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
-    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    return '\${days[dt.weekday-1]}, \${dt.day} \${months[dt.month-1]}';
-  }
 }

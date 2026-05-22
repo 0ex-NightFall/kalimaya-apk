@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../state/auth_state.dart';
@@ -23,6 +22,15 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
       final data = await Api(tok).get('/announcements');
       setState(() { _items = data is List ? data : []; _loading = false; });
     } catch (_) { setState(() => _loading = false); }
+  }
+
+  String _fmtDate(String? iso) {
+    if (iso == null) return '';
+    final dt = DateTime.parse(iso).toLocal();
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    final h = dt.hour.toString().padLeft(2, "0");
+    final m = dt.minute.toString().padLeft(2, "0");
+    return '${dt.day} ${months[dt.month-1]} ${dt.year}, $h:$m';
   }
 
   @override
@@ -69,12 +77,5 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
             ),
       ),
     );
-  }
-
-  String _fmtDate(String? iso) {
-    if (iso == null) return '';
-    final dt = DateTime.parse(iso).toLocal();
-    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    return '\${dt.day} \${months[dt.month-1]} \${dt.year}, \${dt.hour.toString().padLeft(2,'0')}:\${dt.minute.toString().padLeft(2,'0')}';
   }
 }
