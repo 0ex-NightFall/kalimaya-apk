@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kalimaya-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kalimaya
+      POSTGRES_USER: kalimaya
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: kalimaya-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6380:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kalimaya-backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgres://kalimaya:${DB_PASSWORD}@postgres:5432/kalimaya
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 12h
+      STORAGE_PATH: /app/storage
+    volumes:
+      - storage_data:/app/storage
+    ports:
+      - "127.0.0.1:5000:5000"
+
+  web-admin:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    container_name: kalimaya-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: /api
+    ports:
+      - "127.0.0.1:3100:3000"
+
+volumes:
+  postgres_data:
+  storage_data:

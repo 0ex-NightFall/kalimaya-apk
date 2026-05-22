@@ -1,0 +1,16 @@
+node_modules/
+.next/
+dist/
+build/
+*.log
+.env
+.env.local
+.env.prod
+__pycache__/
+*.pyc
+.DS_Store
+flutter/.pub-cache/
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
